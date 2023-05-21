@@ -1,0 +1,33 @@
+---
+title: "Overlapping Time Intervals Viz"
+output: html_document
+date: "2023-05-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(arrow)
+library(data.table)
+library(dplyr)
+df_overlapping_trans <- read_parquet("data/temp_overlapping_trans.parquet") %>%
+  setDT()
+```
+
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+
+df_overlapping_trans[
+  data.table::between(
+    x = duration_dt, lower = min(df_overlapping_trans$duration_dt),
+    upper = (
+      min(df_overlapping_trans$duration_dt) + lubridate::minutes(2)
+    ), incbounds = T
+  )
+] %>% ggplot(
+  aes(x = duration_dt, y = row_nr, fill = (num_other_transactions + 1))
+) + geom_tile()
+```
+
